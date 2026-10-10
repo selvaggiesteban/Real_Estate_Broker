@@ -1,0 +1,260 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PropertyCard from '../../components/PropertyCard.astro';
+import { getPropertyBySlug, getRelated } from '../../lib/properties';
+import { formatDate, formatExpensas, formatPrice, formatSuperficie, pluralAmbientes } from '../../lib/format';
+
+const { slug } = Astro.params;
+const property = slug ? getPropertyBySlug(slug) : undefined;
+
+if (!property) {
+  return Astro.rewrite('/404');
+}
+
+const esVenta = property.operacion === 'venta';
+const related = getRelated(property, 3);
+const telefonoDigits = property.inmobiliaria.telefono.replace(/\D/g, '');
+const whatsapp = `https://wa.me/${telefonoDigits}?text=${encodeURIComponent(`Hola, me interesa la propiedad "${property.titulo}" (${property.zona}). ¿Sigue disponible?`)}`;
+const mailto = `mailto:${property.inmobiliaria.email}?subject=${encodeURIComponent(`Consulta por: ${property.titulo}`)}&body=${encodeURIComponent(`Hola, quisiera recibir más información sobre la propiedad publicada en ${property.direccion}, ${property.zona}.`)}`;
+
+const mapbox = [
+  (property.lng - 0.008).toFixed(4),
+  (property.lat - 0.005).toFixed(4),
+  (property.lng + 0.008).toFixed(4),
+  (property.lat + 0.005).toFixed(4),
+].join('%2C');
+const mapEmbed = `https://www.openstreetmap.org/export/embed.html?bbox=${mapbox}&layer=mapnik&marker=${property.lat}%2C${property.lng}`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'RealEstateListing',
+  name: property.titulo,
+  description: property.descripcion,
+  url: new URL(`/propiedades/${property.slug}`, Astro.site).toString(),
+  datePosted: property.publicadaEn,
+  floorSize: { '@type': 'QuantitativeValue', value: property.superficieTotal, unitText: 'm2' },
+  numberOfRooms: property.ambientes || undefined,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: property.direccion,
+    addressLocality: property.localidad,
+    addressRegion: property.zona,
+    addressCountry: 'AR',
+  },
+  offers: {
+    '@type': 'Offer',
+    price: property.precio,
+    priceCurrency: property.moneda,
+    availability: 'https://schema.org/InStock',
+  },
+  broker: {
+    '@type': 'RealEstateAgent',
+    name: property.inmobiliaria.nombre,
+    telephone: property.inmobiliaria.telefono,
+    email: property.inmobiliaria.email,
+  },
+};
+
+const detalles = [
+  { label: 'Tipo', value: property.tipo === 'ph' ? 'PH' : `${property.tipo.charAt(0).toUpperCase()}${property.tipo.slice(1)}` },
+  { label: 'Operación', value: esVenta ? 'Venta' : 'Alquiler' },
+  { label: 'Ambientes', value: pluralAmbientes(property.ambientes) },
+  ...(property.dormitorios > 0 ? [{ label: 'Dormitorios', value: String(property.dormitorios) }] : []),
+  ...(property.banios > 0 ? [{ label: 'Baños', value: String(property.banios) }] : []),
+  { label: 'Superficie total', value: formatSuperficie(property.superficieTotal) },
+  ...(property.superficieCubierta ? [{ label: 'Superficie cubierta', value: formatSuperficie(property.superficieCubierta) }] : []),
+  ...(property.piso ? [{ label: 'Piso', value: property.piso }] : []),
+  ...(property.orientacion ? [{ label: 'Orientación', value: property.orientacion }] : []),
+  { label: 'Antigüedad', value: property.antiguedad },
+];
+---
+
+<BaseLayout title={`${property.titulo} | ${property.zona} | Real Estate Broker`} description={property.descripcion.slice(0, 155)} jsonLd={jsonLd}>
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <nav aria-label="Migas de pan" class="mb-4 text-xs text-slate-500">
+      <ol class="flex flex-wrap items-center gap-1.5">
+        <li><a href="/" class="font-medium hover:text-brand-700">Inicio</a></li>
+        <li aria-hidden="true">/</li>
+        <li><a href="/propiedades" class="font-medium hover:text-brand-700">Propiedades</a></li>
+        <li aria-hidden="true">/</li>
+        <li><a href={`/propiedades?operacion=${property.operacion}&zona=${property.zona.toLowerCase()}`} class="font-medium hover:text-brand-700">{property.zona}</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="max-w-[16rem] truncate font-semibold text-slate-700">{property.titulo}</li>
+      </ol>
+    </nav>
+
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div>
+        <!-- Galería -->
+        <div class="grid gap-2 sm:grid-cols-2">
+          <div class="overflow-hidden rounded-2xl bg-slate-100 sm:col-span-2">
+            <img
+              src={property.imagenes[0]}
+              alt={`${property.titulo} — imagen principal`}
+              width="1280"
+              height="853"
+              fetchpriority="high"
+              decoding="async"
+              class="aspect-[16/10] w-full object-cover"
+            />
+          </div>
+          {
+            property.imagenes.slice(1, 5).map((imagen, index) => (
+              <div class="overflow-hidden rounded-2xl bg-slate-100">
+                <img
+                  src={imagen}
+                  alt={`${property.titulo} — foto ${index + 2}`}
+                  loading="lazy"
+                  decoding="async"
+                  width="640"
+                  height="427"
+                  class="aspect-[16/10] w-full object-cover"
+                />
+              </div>
+            ))
+          }
+        </div>
+
+        <!-- Título + precio (mobile) -->
+        <div class="mt-6 lg:hidden">
+          <div class="flex flex-wrap gap-2">
+            <span class:list={['rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white', esVenta ? 'bg-accent-500' : 'bg-brand-600']}>
+              {esVenta ? 'En venta' : 'En alquiler'}
+            </span>
+            <span class="chip capitalize">{property.tipo === 'ph' ? 'PH' : property.tipo}</span>
+          </div>
+          <h1 class="mt-3 text-2xl font-extrabold leading-tight tracking-tight text-slate-900">{property.titulo}</h1>
+          <p class="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-slate-400" aria-hidden="true">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            {property.direccion} · {property.zona}, {property.localidad}
+          </p>
+          <p class="mt-3 text-3xl font-extrabold tracking-tight text-brand-900">
+            {formatPrice(property.precio, property.moneda)}
+            {property.operacion === 'alquiler' && <span class="text-base font-semibold text-slate-500">/mes</span>}
+          </p>
+        </div>
+
+        <!-- Descripción -->
+        <section class="card mt-6 p-6">
+          <h2 class="text-lg font-bold text-slate-900">Descripción</h2>
+          <p class="mt-3 text-[15px] leading-relaxed text-slate-600">{property.descripcion}</p>
+          {
+            property.caracteristicas.length > 0 && (
+              <ul class="mt-5 flex flex-wrap gap-2">
+                {property.caracteristicas.map((caracteristica) => (
+                  <li class="chip bg-brand-50 text-brand-800">{caracteristica}</li>
+                ))}
+              </ul>
+            )
+          }
+          <p class="mt-5 border-t border-slate-100 pt-4 text-xs text-slate-400">
+            Publicada el {formatDate(property.publicadaEn)} · ID {property.id.toUpperCase()}
+          </p>
+        </section>
+
+        <!-- Características -->
+        <section class="card mt-6 p-6">
+          <h2 class="text-lg font-bold text-slate-900">Características</h2>
+          <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+            {
+              detalles.map((detalle) => (
+                <div class="border-l-2 border-brand-100 pl-3">
+                  <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">{detalle.label}</dt>
+                  <dd class="mt-0.5 text-sm font-semibold capitalize text-slate-800">{detalle.value}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        <!-- Ubicación -->
+        <section class="card mt-6 p-6">
+          <h2 class="text-lg font-bold text-slate-900">Ubicación</h2>
+          <p class="mt-2 text-sm text-slate-600">
+            {property.direccion} · {property.zona}, {property.localidad}, {property.provincia}
+          </p>
+          <div class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+            <iframe
+              src={mapEmbed}
+              title={`Mapa de ${property.direccion}, ${property.zona}`}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              class="h-72 w-full grayscale-[0.2]"
+            ></iframe>
+          </div>
+          <p class="mt-2 text-xs text-slate-400">Ubicación aproximada · Mapa © OpenStreetMap contributors</p>
+        </section>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="lg:sticky lg:top-20 lg:self-start">
+        <div class="card overflow-hidden">
+          <div class="hidden border-b border-slate-100 bg-slate-50/70 p-6 lg:block">
+            <div class="flex flex-wrap gap-2">
+              <span class:list={['rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white', esVenta ? 'bg-accent-500' : 'bg-brand-600']}>
+                {esVenta ? 'En venta' : 'En alquiler'}
+              </span>
+              <span class="chip capitalize">{property.tipo === 'ph' ? 'PH' : property.tipo}</span>
+              {property.destacada && <span class="rounded-md bg-amber-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-amber-800">Destacada</span>}
+            </div>
+            <h1 class="mt-3 text-xl font-extrabold leading-snug tracking-tight text-slate-900">{property.titulo}</h1>
+            <p class="mt-1.5 text-sm text-slate-500">{property.direccion} · {property.zona}</p>
+            <p class="mt-3 text-3xl font-extrabold tracking-tight text-brand-900">
+              {formatPrice(property.precio, property.moneda)}
+              {property.operacion === 'alquiler' && <span class="text-base font-semibold text-slate-500">/mes</span>}
+            </p>
+            {
+              property.expensas !== undefined && (
+                <p class="mt-1 text-sm text-slate-500">+ Expensas {formatExpensas(property.expensas)}</p>
+              )
+            }
+          </div>
+
+          <div class="space-y-3 p-6">
+            <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Contactar a la inmobiliaria</h2>
+            <a href={mailto} class="btn-primary w-full">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+              Enviar consulta por email
+            </a>
+            <a href={whatsapp} target="_blank" rel="noopener noreferrer" class="btn-secondary w-full">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.13c-.24.68-1.4 1.3-1.94 1.34-.5.04-.98.22-3.3-.69-2.78-1.1-4.55-3.95-4.69-4.13-.14-.19-1.12-1.49-1.12-2.84 0-1.35.71-2.01.96-2.29.25-.28.55-.35.73-.35.18 0 .37 0 .53.01.17.01.4-.06.62.48.24.57.8 1.97.87 2.11.07.14.12.31.02.5-.1.19-.15.31-.29.48-.14.17-.3.38-.43.51-.14.14-.29.29-.12.57.17.28.75 1.23 1.6 1.99 1.1.98 2.03 1.29 2.31 1.43.28.14.45.12.61-.07.17-.19.7-.81.88-1.09.19-.28.37-.23.62-.14.25.09 1.6.75 1.87.89.28.14.46.21.53.32.07.12.07.66-.17 1.34Z"/></svg>
+              Escribir por WhatsApp
+            </a>
+            <a href={`tel:${telefonoDigits}`} class="btn-secondary w-full">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"></path></svg>
+              {property.inmobiliaria.telefono}
+            </a>
+
+            <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Publicada por</p>
+              <p class="mt-1 text-sm font-bold text-slate-900">{property.inmobiliaria.nombre}</p>
+              <p class="mt-0.5 break-all text-xs text-slate-500">{property.inmobiliaria.email}</p>
+            </div>
+            <p class="text-xs leading-relaxed text-slate-400">
+              Los datos son provistos por la inmobiliaria responsable. Real Estate Broker no cobra
+              comisiones ni gestiona la operación.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="mt-14">
+          <div class="flex items-end justify-between gap-4">
+            <h2 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">Propiedades relacionadas</h2>
+            <a href={`/propiedades?zona=${property.zona.toLowerCase()}`} class="text-sm font-semibold text-accent-600 hover:underline">
+              Ver más en {property.zona}
+            </a>
+          </div>
+          <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((item) => <PropertyCard property={item} />)}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>

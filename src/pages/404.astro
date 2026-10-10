@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Página no encontrada | Real Estate Broker"
+  description="La página que buscás no existe o fue movida. Volvé al buscador de propiedades."
+>
+  <div class="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center sm:px-6">
+    <p class="text-7xl font-extrabold tracking-tight text-brand-100">404</p>
+    <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+      No encontramos esa página
+    </h1>
+    <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-500">
+      La URL puede estar mal escrita, o la publicación ya no está disponible.
+      Probá una nueva búsqueda desde el buscador.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="/" class="btn-primary">Volver al inicio</a>
+      <a href="/propiedades" class="btn-secondary">Explorar propiedades</a>
+    </div>
+  </div>
+</BaseLayout>

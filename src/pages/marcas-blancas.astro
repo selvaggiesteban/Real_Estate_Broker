@@ -1,0 +1,277 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const modulos = [
+  {
+    titulo: 'Portal de publicaciones',
+    texto: 'Buscador con la marca del tenant: logo, colores, tipografía y dominio propio. El mismo motor de este sitio.',
+  },
+  {
+    titulo: 'CRM de leads',
+    texto: 'Consultas del portal, WhatsApp y redes centralizadas por inmobiliaria, con asignación y seguimiento.',
+  },
+  {
+    titulo: 'Inventario y publicaciones',
+    texto: 'Altas, bajas, destacadas, sincronización con portales (Zonaprop, Argenprop, Mercado Libre) y control de duplicados.',
+  },
+  {
+    titulo: 'Contratos y reservas',
+    texto: 'Señas, boletas, contratos de locación y venta con flujo de aprobación y trazabilidad completa.',
+  },
+  {
+    titulo: 'Facturación y suscripciones',
+    texto: 'Planes de licencia, límites de publicaciones, cobros recurrentes y facturación por tenant.',
+  },
+  {
+    titulo: 'Portal de clientes',
+    texto: 'Área privada para propietarios e inquilinos: estado de publicaciones, visitas, ofertas y documentos.',
+  },
+];
+
+const planes = [
+  {
+    nombre: 'Starter',
+    para: 'Inmobiliarias y brokers independientes',
+    precio: 'U$S 49',
+    periodo: '/mes',
+    items: ['1 sucursal', 'Hasta 100 publicaciones', '5 usuarios', 'Buscador white-label', 'CRM de leads', 'Soporte por email'],
+    destacado: false,
+  },
+  {
+    nombre: 'Pro',
+    para: 'Inmobiliarias en crecimiento',
+    precio: 'U$S 149',
+    periodo: '/mes',
+    items: ['Multi-sucursal', 'Publicaciones ilimitadas', '25 usuarios', 'Dominio propio', 'API + webhooks', 'Sincronización de portales', 'Soporte prioritario'],
+    destacado: true,
+  },
+  {
+    nombre: 'Enterprise',
+    para: 'Grupos, franquicias y operadores regionales',
+    precio: 'A medida',
+    periodo: '',
+    items: ['Multi-marca (VaaS)', 'Usuarios ilimitados', 'SSO y roles avanzados', 'SLA 99,9%', 'Onboarding dedicado', 'Integraciones a medida'],
+    destacado: false,
+  },
+];
+
+const faqs = [
+  {
+    q: '¿Qué significa "marca blanca" en Real Estate Broker?',
+    a: 'Cada inmobiliaria opera una instancia del producto con su propia identidad visual y dominio. El código, la infraestructura y las mejoras son comunes; la experiencia del cliente final es exclusiva de cada marca.',
+  },
+  {
+    q: '¿Cómo funciona la multi-tenancy?',
+    a: 'Cada tenant tiene sus datos aislados lógicamente (con row-level security hacia el futuro en D1) y su propio espacio de branding. Las consultas siempre se resuelven contra el tenant activo, resuelto por host o subdominio.',
+  },
+  {
+    q: '¿Qué incluye la licencia de suscripción?',
+    a: 'El acceso al portal, al CRM, a las integraciones y a las actualizaciones del producto según el plan contratado. Los límites de publicaciones, usuarios y sucursales se administran desde el panel de facturación.',
+  },
+  {
+    q: '¿Este buscador público es parte del ERP?',
+    a: 'Sí. Es el MVP: el motor de búsqueda y la API pública sobre los que se construye cada portal white-label y el backoffice completo.',
+  },
+];
+---
+
+<BaseLayout
+  title="ERP inmobiliario white-label | Real Estate Broker"
+  description="Software ERP de marca blanca para inmobiliarias: buscador con tu marca, CRM de leads, inventario, contratos y suscripciones. Multi-tenant con licencias por plan."
+>
+  <!-- Hero -->
+  <section class="relative overflow-hidden bg-brand-950">
+    <div
+      class="absolute inset-0 opacity-40"
+      style="background-image: radial-gradient(circle at 80% 20%, rgba(255,107,53,0.3), transparent 40%), radial-gradient(circle at 10% 80%, rgba(51,121,209,0.35), transparent 40%);"
+      aria-hidden="true"
+    ></div>
+    <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <p class="text-xs font-semibold uppercase tracking-widest text-accent-400">Real Estate Broker ERP · E2E</p>
+      <h1 class="mt-3 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
+        El software de gestión inmobiliaria que se hace pasar por tu marca
+      </h1>
+      <p class="mt-5 max-w-2xl text-base leading-relaxed text-brand-200 sm:text-lg">
+        Una sola plataforma multi-tenant para operar portales de publicaciones, CRM, contratos y
+        facturación. Vos vendés la suscripción con tu marca; nosotros mantenemos la tecnología.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#planes" class="btn-primary">Ver planes y licencias</a>
+        <a href="mailto:hola@realestatebroker.example.com?subject=Demo%20ERP%20white-label" class="inline-flex items-center justify-center rounded-lg border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Solicitar una demo</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Módulos -->
+  <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Un ERP completo, módulo a módulo</h2>
+    <p class="mt-2 max-w-2xl text-sm text-slate-500">
+      Empezás por el buscador (el MVP que estás viendo) y activás el resto de los módulos según tu plan.
+    </p>
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        modulos.map((modulo) => (
+          <div class="card p-6 transition hover:-translate-y-0.5 hover:shadow-md">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              </svg>
+            </span>
+            <h3 class="mt-4 text-base font-bold text-slate-900">{modulo.titulo}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">{modulo.texto}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Multi-tenant -->
+  <section class="border-y border-slate-200 bg-white">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+      <div>
+        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Arquitectura multi-tenant de verdad</h2>
+        <p class="mt-4 text-sm leading-relaxed text-slate-600">
+          Cada inmobiliaria es un tenant con su identidad, sus usuarios y su base de datos lógica.
+          El routing resuelve el tenant por host (portal.marcainmobiliaria.com o dominio propio),
+          y el branding se aplica mediante tokens de diseño: colores, logo y tipografía.
+        </p>
+        <ul class="mt-6 space-y-3">
+          {
+            [
+              'Aislamiento de datos por tenant con políticas de acceso estrictas',
+              'Configuración de marca por tenant sin forks del código',
+              'Licencias con límites de uso facturables (publicaciones, usuarios, sucursales)',
+              'Actualizaciones continuas: todas las marcas reciben las mejoras al mismo tiempo',
+            ].map((item) => (
+              <li class="flex items-start gap-2.5 text-sm text-slate-700">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 h-4 w-4 shrink-0 text-accent-500" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="card overflow-hidden">
+        <div class="border-b border-slate-100 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Vista de tenants
+        </div>
+        <ul class="divide-y divide-slate-100">
+          {
+            [
+              { marca: 'Nueva Espacio', host: 'nuevaespacio.com', color: '#ff6b35', plan: 'Pro' },
+              { marca: 'Metroq', host: 'metroq.com.ar', color: '#245fad', plan: 'Pro' },
+              { marca: 'Delta Living', host: 'portal.deltaliving.com', color: '#0f766e', plan: 'Starter' },
+              { marca: 'Broker Capital', host: 'brokercapital.com', color: '#7c3aed', plan: 'Enterprise' },
+            ].map((tenant) => (
+              <li class="flex items-center gap-3 px-5 py-4">
+                <span class="h-9 w-9 shrink-0 rounded-xl" style={`background-color: ${tenant.color}`} aria-hidden="true" />
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-bold text-slate-900">{tenant.marca}</span>
+                  <span class="block truncate font-mono text-xs text-slate-400">{tenant.host}</span>
+                </span>
+                <span class="chip">{tenant.plan}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Planes -->
+  <section id="planes" class="mx-auto max-w-7xl scroll-mt-20 px-4 py-16 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Planes de licencia</h2>
+      <p class="mx-auto mt-2 max-w-xl text-sm text-slate-500">
+        Suscripciones mensuales por tenant. Todos los planes incluyen hosting en Cloudflare, actualizaciones y SSL.
+      </p>
+    </div>
+    <div class="mt-10 grid gap-6 lg:grid-cols-3">
+      {
+        planes.map((plan) => (
+          <div
+            class:list={[
+              'card relative flex flex-col p-7',
+              plan.destacado && 'border-2 border-accent-500 shadow-lg',
+            ]}
+          >
+            {plan.destacado && (
+              <span class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+                Más elegido
+              </span>
+            )}
+            <h3 class="text-lg font-extrabold text-slate-900">{plan.nombre}</h3>
+            <p class="mt-1 text-sm text-slate-500">{plan.para}</p>
+            <p class="mt-5">
+              <span class="text-4xl font-extrabold tracking-tight text-brand-900">{plan.precio}</span>
+              <span class="text-sm font-semibold text-slate-500">{plan.periodo}</span>
+            </p>
+            <ul class="mt-6 flex-1 space-y-2.5">
+              {plan.items.map((item) => (
+                <li class="flex items-start gap-2.5 text-sm text-slate-700">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 h-4 w-4 shrink-0 text-brand-600" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <a
+              href={`mailto:hola@realestatebroker.example.com?subject=${encodeURIComponent(`Consulta plan ${plan.nombre}`)}`}
+              class:list={['mt-8 w-full', plan.destacado ? 'btn-primary' : 'btn-secondary']}
+            >
+              {plan.precio === 'A medida' ? 'Hablar con ventas' : 'Contratar plan'}
+            </a>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="border-t border-slate-200 bg-white">
+    <div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Preguntas frecuentes</h2>
+      <div class="mt-8 space-y-3">
+        {
+          faqs.map((faq) => (
+            <details class="card group p-5">
+              <summary class="cursor-pointer list-none text-sm font-bold text-slate-900 marker:hidden">
+                <span class="flex items-center justify-between gap-4">
+                  {faq.q}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-45" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </span>
+              </summary>
+              <p class="mt-3 text-sm leading-relaxed text-slate-600">{faq.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="bg-accent-500">
+    <div class="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 py-14 text-center sm:px-6 lg:px-8">
+      <h2 class="max-w-2xl text-3xl font-extrabold tracking-tight text-white">
+        Llevá el buscador que acabás de ver a tu propia marca
+      </h2>
+      <p class="max-w-xl text-sm leading-relaxed text-accent-50 sm:text-base">
+        Contanos cuántas sucursales y publicaciones manejás y te armamos una demo con tus datos.
+      </p>
+      <a
+        href="mailto:hola@realestatebroker.example.com?subject=Quiero%20mi%20portal%20white-label"
+        class="inline-flex items-center justify-center rounded-lg bg-brand-950 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-900"
+      >
+        Solicitar demo white-label
+      </a>
+    </div>
+  </section>
+</BaseLayout>

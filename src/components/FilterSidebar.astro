@@ -1,0 +1,120 @@
+---
+import { TIPOS_PROPIEDAD } from '../lib/types';
+import type { SearchFilters, TipoPropiedad } from '../lib/types';
+
+interface Props {
+  filters: SearchFilters;
+  zonas: { nombre: string; total: number }[];
+  tipoCounts: Record<TipoPropiedad, number>;
+}
+
+const { filters, zonas, tipoCounts } = Astro.props;
+
+const tipoLabels: Record<TipoPropiedad, string> = {
+  departamento: 'Departamento',
+  casa: 'Casa',
+  ph: 'PH',
+  terreno: 'Terreno',
+  oficina: 'Oficina',
+  local: 'Local comercial',
+};
+---
+
+<form action="/propiedades" method="get" class="space-y-6">
+  {filters.operacion && <input type="hidden" name="operacion" value={filters.operacion} />}
+  <input type="hidden" name="orden" value={filters.orden} />
+
+  <div class="flex items-center justify-between">
+    <h2 class="text-base font-bold text-slate-900">Filtros</h2>
+    <a href="/propiedades" class="text-xs font-semibold text-accent-600 hover:text-accent-700 hover:underline">
+      Limpiar todo
+    </a>
+  </div>
+
+  <fieldset>
+    <legend class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de propiedad</legend>
+    <div class="space-y-1.5">
+      {
+        TIPOS_PROPIEDAD.map((tipo) => (
+          <label class="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
+            <input
+              type="checkbox"
+              name="tipo"
+              value={tipo}
+              checked={filters.tipos.includes(tipo)}
+              class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+            />
+            <span class="flex-1">{tipoLabels[tipo]}</span>
+            <span class="text-xs tabular-nums text-slate-400">{tipoCounts[tipo]}</span>
+          </label>
+        ))
+      }
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Zona</legend>
+    <div class="max-h-56 space-y-1.5 overflow-y-auto pr-1">
+      {
+        zonas.map(({ nombre, total }) => (
+          <label class="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
+            <input
+              type="checkbox"
+              name="zona"
+              value={nombre.toLowerCase()}
+              checked={filters.zonas.includes(nombre.toLowerCase())}
+              class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+            />
+            <span class="flex-1">{nombre}</span>
+            <span class="text-xs tabular-nums text-slate-400">{total}</span>
+          </label>
+        ))
+      }
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Ambientes</legend>
+    <div class="flex flex-wrap gap-2">
+      <label class="cursor-pointer">
+        <input type="radio" name="ambientes" value="" class="peer sr-only" checked={filters.ambientes === undefined} />
+        <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 transition peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white">Todos</span>
+      </label>
+      {
+        [1, 2, 3, 4, 5].map((n) => (
+          <label class="cursor-pointer">
+            <input
+              type="radio"
+              name="ambientes"
+              value={n}
+              class="peer sr-only"
+              checked={filters.ambientes === n}
+            />
+            <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 transition peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white">
+              {n === 5 ? '5+' : n}
+            </span>
+          </label>
+        ))
+      }
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Precio</legend>
+    <div class="grid grid-cols-2 gap-2">
+      <input type="number" name="precio_min" min="0" step="1000" placeholder="Mínimo" value={filters.precioMin ?? ''} class="input-base" aria-label="Precio mínimo" />
+      <input type="number" name="precio_max" min="0" step="1000" placeholder="Máximo" value={filters.precioMax ?? ''} class="input-base" aria-label="Precio máximo" />
+    </div>
+    <p class="mt-2 text-xs text-slate-400">Venta en USD · Alquiler en ARS</p>
+  </fieldset>
+
+  <fieldset>
+    <legend class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Superficie total</legend>
+    <div class="relative">
+      <input type="number" name="superficie_min" min="0" step="5" placeholder="Desde m²" value={filters.superficieMin ?? ''} class="input-base pr-12" aria-label="Superficie mínima en metros cuadrados" />
+      <span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-xs text-slate-400">m²</span>
+    </div>
+  </fieldset>
+
+  <button type="submit" class="btn-primary w-full">Aplicar filtros</button>
+</form>

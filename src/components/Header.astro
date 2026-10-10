@@ -1,0 +1,75 @@
+---
+const pathname = Astro.url.pathname;
+
+const links = [
+  { href: '/', label: 'Inicio' },
+  { href: '/propiedades', label: 'Propiedades' },
+  { href: '/api-docs', label: 'API pública' },
+  { href: '/marcas-blancas', label: 'Marcas blancas' },
+];
+
+const isActive = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur">
+  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <a href="/" class="flex items-center gap-2.5" aria-label="Real Estate Broker - Inicio">
+      <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-white">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+          <path d="M3 10.5 12 3l9 7.5"></path>
+          <path d="M5 9.5V21h14V9.5"></path>
+          <path d="M10 21v-6h4v6"></path>
+        </svg>
+      </span>
+      <span class="leading-tight">
+        <span class="block text-[15px] font-extrabold tracking-tight text-brand-950">Real Estate Broker</span>
+        <span class="block text-[11px] font-medium uppercase tracking-wider text-slate-500">Motor inmobiliario</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-1 md:flex" aria-label="Principal">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              'rounded-lg px-3.5 py-2 text-sm font-medium transition',
+              isActive(link.href)
+                ? 'bg-brand-50 text-brand-800'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+            ]}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href="/propiedades?operacion=venta" class="btn-primary hidden sm:inline-flex">Buscar propiedades</a>
+
+      <details class="relative md:hidden">
+        <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 text-slate-700">
+          <span class="sr-only">Abrir menú</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+        </summary>
+        <div class="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+          {
+            links.map((link) => (
+              <a
+                href={link.href}
+                class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                {link.label}
+              </a>
+            ))
+          }
+        </div>
+      </details>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Lote de terreno con vista a los árboles">
+  <defs>
+    <linearGradient id="skyT" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#ecfdf5"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4ade80"/>
+      <stop offset="1" stop-color="#16a34a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#skyT)"/>
+  <circle cx="640" cy="120" r="48" fill="#fef08a"/>
+  <path d="M0 340q120-80 240-40t240-60 320 20v120H0z" fill="#86efac" opacity="0.8"/>
+  <rect y="340" width="800" height="260" fill="url(#grass)"/>
+  <path d="M120 340l280 180H0z" fill="#bbf7d0" opacity="0.55"/>
+  <path d="M680 340 420 520h380z" fill="#bbf7d0" opacity="0.4"/>
+  <g stroke="#fef3c7" stroke-width="8" stroke-dasharray="26 18" stroke-linecap="round">
+    <line x1="60" y1="430" x2="740" y2="430"/>
+    <line x1="20" y1="380" x2="780" y2="380"/>
+  </g>
+  <g>
+    <rect x="120" y="250" width="14" height="100" fill="#78350f"/>
+    <circle cx="127" cy="230" r="46" fill="#15803d"/>
+    <rect x="660" y="260" width="14" height="90" fill="#78350f"/>
+    <circle cx="667" cy="240" r="40" fill="#16a34a"/>
+    <rect x="720" y="280" width="12" height="70" fill="#78350f"/>
+    <circle cx="726" cy="262" r="32" fill="#22c55e"/>
+  </g>
+  <rect x="380" y="300" width="40" height="60" rx="4" fill="#ff6b35"/>
+  <path d="M376 300h48l-24-26z" fill="#c73d0b"/>
+</svg>

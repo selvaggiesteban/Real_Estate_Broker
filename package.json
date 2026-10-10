@@ -1,0 +1,29 @@
+{
+  "name": "real-estate-broker",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Motor de búsqueda inmobiliaria con API pública. MVP del ecosistema Real Estate Broker (ERP white-label multi-tenant).",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro",
+    "pages:deploy": "wrangler pages deploy dist --project-name=real-estate-broker"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.0.0",
+    "@astrojs/sitemap": "^3.7.3",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^5.16.0",
+    "tailwindcss": "^4.3.0",
+    "wrangler": "^4.98.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "typescript": "^5.9.3"
+  }
+}

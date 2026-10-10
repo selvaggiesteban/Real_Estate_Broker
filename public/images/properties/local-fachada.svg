@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Fachada de local comercial con vidriera">
+  <defs>
+    <linearGradient id="skyL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#93c5fd"/>
+      <stop offset="1" stop-color="#ede9fe"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#skyL)"/>
+  <rect y="500" width="800" height="100" fill="#475569"/>
+  <rect x="100" y="120" width="600" height="390" rx="8" fill="#f8fafc"/>
+  <rect x="100" y="120" width="600" height="90" rx="8" fill="#0e2340"/>
+  <text x="400" y="178" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#ffffff">TU MARCA</text>
+  <g>
+    <path d="M120 210h560l-40 60H160z" fill="#ff6b35"/>
+    <path d="M160 210h60l-20 60h-60zM280 210h60l-20 60h-60zM400 210h60l-20 60h-60zM520 210h60l-20 60h-60z" fill="#f04e0e"/>
+  </g>
+  <rect x="150" y="290" width="280" height="180" rx="6" fill="#bae6fd" stroke="#94a3b8" stroke-width="6"/>
+  <rect x="470" y="290" width="140" height="220" rx="6" fill="#1d4c8b"/>
+  <rect x="486" y="310" width="108" height="120" rx="4" fill="#7dd3fc" opacity="0.8"/>
+  <circle cx="592" cy="450" r="8" fill="#fde68a"/>
+  <rect x="190" y="380" width="90" height="90" rx="6" fill="#fef3c7"/>
+  <circle cx="235" cy="425" r="26" fill="#ff6b35" opacity="0.8"/>
+  <rect x="320" y="400" width="80" height="70" rx="6" fill="#ede9fe"/>
+  <rect x="700" y="380" width="14" height="120" fill="#78350f"/>
+  <circle cx="707" cy="356" r="36" fill="#16a34a"/>
+  <rect x="60" y="400" width="14" height="100" fill="#78350f"/>
+  <circle cx="67" cy="378" r="32" fill="#22c55e"/>
+</svg>

@@ -1,0 +1,243 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBar from '../components/SearchBar.astro';
+import PropertyCard from '../components/PropertyCard.astro';
+import { getFeatured, getStats, getTipoCounts, getZonas } from '../lib/properties';
+import { TIPOS_PROPIEDAD } from '../lib/types';
+import type { TipoPropiedad } from '../lib/types';
+
+const destacadas = getFeatured(6);
+const stats = getStats();
+const tipoCounts = getTipoCounts();
+
+const tipoInfo: Record<TipoPropiedad, { label: string; plural: string; icon: string }> = {
+  departamento: { label: 'Departamento', plural: 'Departamentos', icon: 'M3 21h18M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M15 21V9h4a2 2 0 0 1 2 2v10M9 7h2M9 11h2M9 15h2' },
+  casa: { label: 'Casa', plural: 'Casas', icon: 'M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M10 21v-6h4v6' },
+  ph: { label: 'PH', plural: 'PH', icon: 'M4 21V8l4-4 4 4v13M12 21V11l4-3 4 3v10M7 12h2M7 16h2M16 14h2' },
+  terreno: { label: 'Terreno', plural: 'Terrenos', icon: 'M3 18c3-6 6 2 9-3s6 1 9-3M3 21h18M5 14l2-2 2 2' },
+  oficina: { label: 'Oficina', plural: 'Oficinas', icon: 'M4 21V4a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v17M15 9h4a1 1 0 0 1 1 1v11M2 21h20M8 7h3M8 11h3M8 15h3' },
+  local: { label: 'Local comercial', plural: 'Locales', icon: 'M3 9l1.5-5h15L21 9M3 9h18v12H3V9ZM3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0' },
+};
+
+const pasos = [
+  {
+    n: '01',
+    titulo: 'Definí tus filtros',
+    texto: 'Operación, tipo, zona, ambientes y rango de precios. El motor filtra en milisegundos.',
+  },
+  {
+    n: '02',
+    titulo: 'Compará publicaciones',
+    texto: 'Fichas con fotos, m², expensas y características normalizadas. Sin letra chica.',
+  },
+  {
+    n: '03',
+    titulo: 'Contactá a la inmobiliaria',
+    texto: 'Teléfono, WhatsApp y email de la agencia responsable de cada propiedad.',
+  },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Real Estate Broker',
+  url: Astro.site?.toString(),
+  inLanguage: 'es-AR',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${Astro.site?.toString()}propiedades?zona={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+---
+
+<BaseLayout
+  title="Real Estate Broker — Buscador de propiedades en venta y alquiler"
+  description="Buscá departamentos, casas, PH, oficinas y terrenos en venta y alquiler. Motor de búsqueda inmobiliaria con API pública, construido sobre Cloudflare."
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section class="relative overflow-hidden bg-brand-950">
+    <div
+      class="absolute inset-0 opacity-40"
+      style="background-image: radial-gradient(circle at 15% 20%, rgba(51,121,209,0.35), transparent 40%), radial-gradient(circle at 85% 10%, rgba(255,107,53,0.25), transparent 35%);"
+      aria-hidden="true"
+    >
+    </div>
+    <div
+      class="absolute inset-0 opacity-[0.07]"
+      style="background-image: linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px); background-size: 44px 44px;"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 lg:px-8">
+      <div class="max-w-3xl">
+        <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-100">
+          <span class="h-1.5 w-1.5 rounded-full bg-accent-400"></span>
+          MVP · Búsqueda con API pública
+        </p>
+        <h1 class="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+          Encontrá la propiedad<br class="hidden sm:block" />
+          <span class="text-accent-400">que buscás</span>
+        </h1>
+        <p class="mt-4 max-w-xl text-base leading-relaxed text-brand-200 sm:text-lg">
+          Departamentos, casas, PH, oficinas y terrenos en venta y alquiler.
+          Una búsqueda rápida, fichas claras y una API abierta para integradores.
+        </p>
+      </div>
+
+      <div class="mt-8 max-w-5xl">
+        <SearchBar zonas={getZonas()} />
+      </div>
+
+      <dl class="mt-8 flex flex-wrap gap-x-10 gap-y-4 text-brand-100">
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-brand-300">Publicaciones</dt>
+          <dd class="text-2xl font-extrabold text-white">{stats.totalPropiedades}+</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-brand-300">Zonas</dt>
+          <dd class="text-2xl font-extrabold text-white">{stats.totalZonas}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-brand-300">En venta</dt>
+          <dd class="text-2xl font-extrabold text-white">{stats.venta}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-brand-300">En alquiler</dt>
+          <dd class="text-2xl font-extrabold text-white">{stats.alquiler}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Operaciones rápidas -->
+  <section class="mx-auto -mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
+      <a
+        href="/propiedades?operacion=venta"
+        class="card flex items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:border-accent-300 hover:shadow-md"
+      >
+        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </span>
+        <span>
+          <span class="block text-lg font-bold text-slate-900">Comprar</span>
+          <span class="block text-sm text-slate-500">{stats.venta} propiedades en venta</span>
+        </span>
+      </a>
+      <a
+        href="/propiedades?operacion=alquiler"
+        class="card flex items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md"
+      >
+        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5"></path></svg>
+        </span>
+        <span>
+          <span class="block text-lg font-bold text-slate-900">Alquilar</span>
+          <span class="block text-sm text-slate-500">{stats.alquiler} propiedades en alquiler</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Destacadas -->
+  <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Propiedades destacadas</h2>
+        <p class="mt-1.5 text-sm text-slate-500">Una selección de las publicaciones más interesantes del mes.</p>
+      </div>
+      <a href="/propiedades" class="btn-secondary">Ver todas las propiedades</a>
+    </div>
+
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {destacadas.map((property) => <PropertyCard property={property} />)}
+    </div>
+  </section>
+
+  <!-- Por tipo -->
+  <section class="border-y border-slate-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Explorá por tipo de propiedad</h2>
+      <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {
+          TIPOS_PROPIEDAD.map((tipo) => (
+            <a
+              href={`/propiedades?tipo=${tipo}`}
+              class="card flex flex-col items-center gap-3 p-5 text-center transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md"
+            >
+              <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5.5 w-5.5" aria-hidden="true">
+                  <path d={tipoInfo[tipo].icon} />
+                </svg>
+              </span>
+              <span class="text-sm font-bold text-slate-900">{tipoInfo[tipo].plural}</span>
+              <span class="text-xs text-slate-500">{tipoCounts[tipo]} disponibles</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Cómo funciona -->
+  <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Cómo funciona</h2>
+    <div class="mt-8 grid gap-6 md:grid-cols-3">
+      {
+        pasos.map((paso) => (
+          <div class="card p-6">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-accent-500">{paso.n}</span>
+            <h3 class="mt-3 text-lg font-bold text-slate-900">{paso.titulo}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">{paso.texto}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Pitch ERP -->
+  <section class="bg-brand-950">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-widest text-accent-400">E2E · Real Estate Broker ERP</p>
+        <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          Tu inmobiliaria, con tecnología propia
+        </h2>
+        <p class="mt-4 max-w-xl text-sm leading-relaxed text-brand-200 sm:text-base">
+          Este buscador es el MVP de una plataforma mayor: un ERP de marca blanca multi-tenant,
+          con licencias y venta de suscripciones. Cada inmobiliaria opera su portal con su marca,
+          sus colores y su dominio — sobre la misma base de código.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="/marcas-blancas" class="btn-primary">Conocer la propuesta white-label</a>
+          <a href="/api-docs" class="inline-flex items-center justify-center rounded-lg border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Ver la API</a>
+        </div>
+      </div>
+      <ul class="grid gap-3 sm:grid-cols-2">
+        {
+          [
+            'Portal buscador con marca propia',
+            'CRM de leads integrado',
+            'Gestión de inventario y publicaciones',
+            'Multi-tenant con aislamiento total',
+            'Licencias y planes de suscripción',
+            'API REST para portales y apps',
+          ].map((item) => (
+            <li class="flex items-start gap-2.5 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-brand-100">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 h-4 w-4 shrink-0 text-accent-400" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,174 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const origin = Astro.site?.origin ?? 'https://real-estate-broker.pages.dev';
+
+const endpoints = [
+  {
+    metodo: 'GET',
+    ruta: '/api/health',
+    desc: 'Healthcheck del servicio. Devuelve estado, versión y uptime.',
+  },
+  {
+    metodo: 'GET',
+    ruta: '/api/properties',
+    desc: 'Listado de publicaciones con filtros, ordenamiento y paginación.',
+  },
+  {
+    metodo: 'GET',
+    ruta: '/api/properties/{id}',
+    desc: 'Detalle de una publicación por id (p001) o slug.',
+  },
+  {
+    metodo: 'POST',
+    ruta: '/api/leads',
+    desc: 'Recepción de consultas (leads) de contacto desde portales terceros.',
+  },
+];
+
+const params = [
+  { nombre: 'operacion', tipo: 'string', desc: 'venta | alquiler' },
+  { nombre: 'tipo', tipo: 'string', desc: 'departamento | casa | ph | terreno | oficina | local (repetible o coma-separado)' },
+  { nombre: 'zona', tipo: 'string', desc: 'Nombre de zona, case-insensitive (repetible o coma-separado)' },
+  { nombre: 'ambientes', tipo: 'number', desc: 'Cantidad exacta de ambientes (1–10)' },
+  { nombre: 'precio_min', tipo: 'number', desc: 'Precio mínimo' },
+  { nombre: 'precio_max', tipo: 'number', desc: 'Precio máximo' },
+  { nombre: 'superficie_min', tipo: 'number', desc: 'Superficie total mínima en m²' },
+  { nombre: 'orden', tipo: 'string', desc: 'recientes | precio-asc | precio-desc | superficie-desc' },
+  { nombre: 'page', tipo: 'number', desc: 'Página (default 1)' },
+  { nombre: 'limit', tipo: 'number', desc: 'Resultados por página (default 12, máx. 48)' },
+];
+
+const ejemplo = `{
+  "ok": true,
+  "data": [
+    {
+      "id": "p001",
+      "slug": "departamento-venta-palermo-3-ambientes",
+      "titulo": "Departamento luminoso de 3 ambientes con balcón",
+      "operacion": "venta",
+      "tipo": "departamento",
+      "precio": 189000,
+      "moneda": "USD",
+      "expensas": 95000,
+      "ambientes": 3,
+      "dormitorios": 2,
+      "banios": 1,
+      "superficieTotal": 78,
+      "zona": "Palermo",
+      "localidad": "CABA",
+      "lat": -34.5885,
+      "lng": -58.4269,
+      "imagenes": ["/images/properties/depto-exterior.svg"],
+      "inmobiliaria": {
+        "nombre": "Nueva Espacio Propiedades",
+        "telefono": "+54 11 4832-1000",
+        "email": "contacto@nuevaespacio.example.com"
+      }
+    }
+  ],
+  "meta": { "total": 1, "page": 1, "limit": 12, "totalPages": 1 },
+  "links": { "self": "...", "first": "..." }
+}`;
+---
+
+<BaseLayout
+  title="API pública REST | Real Estate Broker"
+  description="Documentación de la API pública de Real Estate Broker: búsqueda de propiedades, detalle, healthcheck y recepción de leads. CORS abierto y respuestas JSON."
+>
+  <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+    <p class="text-xs font-semibold uppercase tracking-widest text-accent-500">Developers</p>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">API pública REST</h1>
+    <p class="mt-4 max-w-2xl text-[15px] leading-relaxed text-slate-600">
+      Todo el inventario del buscador está disponible como JSON en el edge, con
+      <strong class="font-semibold text-slate-800">CORS abierto</strong>, cache en el CDN y
+      paginación estable. Ideal para integrar portales, apps, chatbots o tableros de datos.
+    </p>
+
+    <div class="card mt-6 flex flex-wrap items-center gap-2 p-4 text-sm">
+      <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Base URL</span>
+      <code class="rounded-lg bg-slate-900 px-3 py-1.5 font-mono text-xs text-emerald-300">{origin}/api</code>
+    </div>
+
+    <h2 class="mt-12 text-xl font-extrabold tracking-tight text-slate-900">Endpoints</h2>
+    <div class="mt-4 space-y-3">
+      {
+        endpoints.map((endpoint) => (
+          <div class="card flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:gap-4">
+            <span
+              class:list={[
+                'w-fit rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white',
+                endpoint.metodo === 'GET' ? 'bg-brand-600' : 'bg-accent-500',
+              ]}
+            >
+              {endpoint.metodo}
+            </span>
+            <code class="font-mono text-sm font-semibold text-slate-800">{endpoint.ruta}</code>
+            <p class="text-sm text-slate-500 sm:ml-auto sm:text-right">{endpoint.desc}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <h2 class="mt-12 text-xl font-extrabold tracking-tight text-slate-900">Parámetros de búsqueda</h2>
+    <p class="mt-2 text-sm text-slate-500">Aplican a <code class="font-mono text-xs text-slate-700">GET /api/properties</code> y a los resultados del buscador web.</p>
+    <div class="card mt-4 overflow-x-auto">
+      <table class="w-full min-w-[38rem] text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <th class="px-4 py-3 font-semibold">Parámetro</th>
+            <th class="px-4 py-3 font-semibold">Tipo</th>
+            <th class="px-4 py-3 font-semibold">Descripción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {
+            params.map((param) => (
+              <tr>
+                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs font-semibold text-brand-800">{param.nombre}</td>
+                <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-500">{param.tipo}</td>
+                <td class="px-4 py-3 text-slate-600">{param.desc}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="mt-12 text-xl font-extrabold tracking-tight text-slate-900">Ejemplo</h2>
+    <pre class="card mt-4 overflow-x-auto bg-slate-900 p-5 text-xs leading-relaxed text-emerald-300"><code>{`GET /api/properties?operacion=venta&tipo=departamento&zona=palermo&ambientes=3&precio_max=200000&orden=precio-asc&page=1`}</code></pre>
+    <pre class="card mt-3 overflow-x-auto bg-slate-950 p-5 text-xs leading-relaxed text-slate-300"><code>{ejemplo}</code></pre>
+
+    <h2 class="mt-12 text-xl font-extrabold tracking-tight text-slate-900">Errores</h2>
+    <div class="card mt-4 divide-y divide-slate-100">
+      {
+        [
+          { code: 'NOT_FOUND', status: '404', msg: 'El id o slug solicitado no existe.' },
+          { code: 'VALIDATION_ERROR', status: '400', msg: 'Datos inválidos en el cuerpo del request.' },
+          { code: 'INVALID_JSON', status: '400', msg: 'El body no es JSON válido.' },
+        ].map((error) => (
+          <div class="flex flex-wrap items-center gap-3 p-4 text-sm">
+            <code class="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-semibold text-slate-700">{error.status}</code>
+            <code class="font-mono text-xs font-semibold text-accent-700">{error.code}</code>
+            <span class="text-slate-600">{error.msg}</span>
+          </div>
+        ))
+      }
+    </div>
+
+    <h2 class="mt-12 text-xl font-extrabold tracking-tight text-slate-900">Consideraciones</h2>
+    <ul class="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-600">
+      <li>CORS habilitado con <code class="font-mono text-xs">Access-Control-Allow-Origin: *</code> para lectura pública.</li>
+      <li>Las respuestas de listado se cachean 60 s en el cliente y 300 s en el edge (Cloudflare).</li>
+      <li>Límite máximo de 48 resultados por página para mantener latencias bajas.</li>
+      <li>En el roadmap: autenticación por API key con rate limiting y webhooks de sincronización.</li>
+    </ul>
+
+    <div class="card mt-10 flex flex-col gap-3 bg-brand-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-sm font-medium text-brand-900">
+        ¿Querés el motor completo con tu marca? Conocé el ERP white-label.
+      </p>
+      <a href="/marcas-blancas" class="btn-primary shrink-0">Ver propuesta para inmobiliarias</a>
+    </div>
+  </div>
+</BaseLayout>

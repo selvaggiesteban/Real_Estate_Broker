@@ -1,0 +1,98 @@
+---
+import { filtersToSearchParams } from '../lib/search';
+import type { SearchFilters } from '../lib/types';
+
+interface Props {
+  page: number;
+  totalPages: number;
+  filters: SearchFilters;
+}
+
+const { page, totalPages, filters } = Astro.props;
+
+function hrefFor(target: number): string {
+  const params = filtersToSearchParams({ ...filters, page: target });
+  const query = params.toString();
+  return query ? `/propiedades?${query}` : '/propiedades';
+}
+
+function pageWindow(current: number, total: number): (number | 'gap-start' | 'gap-end')[] {
+  const pages = new Set<number>([1, total, current, current - 1, current + 1]);
+  const valid = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+
+  const items: (number | 'gap-start' | 'gap-end')[] = [];
+  let previous = 0;
+  for (const p of valid) {
+    if (previous && p - previous > 1) items.push(previous === 1 ? 'gap-start' : 'gap-end');
+    items.push(p);
+    previous = p;
+  }
+  return items;
+}
+
+const show = totalPages > 1;
+const items = show ? pageWindow(page, totalPages) : [];
+---
+
+{
+  show && (
+<nav class="mt-10 flex items-center justify-center gap-1.5" aria-label="Paginación">
+  {
+    page > 1 ? (
+      <a
+        href={hrefFor(page - 1)}
+        class="inline-flex h-10 items-center gap-1 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+        Anterior
+      </a>
+    ) : (
+      <span class="inline-flex h-10 items-center rounded-lg border border-slate-100 bg-slate-50 px-3.5 text-sm font-semibold text-slate-300">
+        Anterior
+      </span>
+    )
+  }
+
+  {
+    items.map((item) =>
+      typeof item === 'number' ? (
+        <a
+          href={hrefFor(item)}
+          aria-current={item === page ? 'page' : undefined}
+          class:list={[
+            'inline-flex h-10 min-w-10 items-center justify-center rounded-lg px-3 text-sm font-semibold transition',
+            item === page
+              ? 'bg-brand-700 text-white shadow-sm'
+              : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-400 hover:text-brand-700',
+          ]}
+        >
+          {item}
+        </a>
+      ) : (
+        <span class="px-1 text-sm text-slate-400">…</span>
+      ),
+    )
+  }
+
+  {
+    page < totalPages ? (
+      <a
+        href={hrefFor(page + 1)}
+        class="inline-flex h-10 items-center gap-1 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
+      >
+        Siguiente
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+      </a>
+    ) : (
+      <span class="inline-flex h-10 items-center rounded-lg border border-slate-100 bg-slate-50 px-3.5 text-sm font-semibold text-slate-300">
+        Siguiente
+      </span>
+    )
+  }
+</nav>
+  )
+}

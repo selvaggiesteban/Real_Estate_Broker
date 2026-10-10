@@ -1,0 +1,79 @@
+---
+const year = new Date().getFullYear();
+
+const product = [
+  { href: '/propiedades', label: 'Buscar propiedades' },
+  { href: '/propiedades?operacion=venta', label: 'Propiedades en venta' },
+  { href: '/propiedades?operacion=alquiler', label: 'Propiedades en alquiler' },
+];
+
+const business = [
+  { href: '/marcas-blancas', label: 'ERP white-label' },
+  { href: '/marcas-blancas#planes', label: 'Planes y licencias' },
+  { href: '/api-docs', label: 'Documentación API' },
+];
+
+const contact = [
+  { href: 'mailto:hola@realestatebroker.example.com', label: 'hola@realestatebroker.example.com' },
+  { href: 'tel:+541150000000', label: '+54 11 5000-0000' },
+];
+---
+
+<footer class="mt-16 border-t border-slate-200 bg-brand-950 text-brand-100">
+  <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+    <div class="sm:col-span-2 lg:col-span-1">
+      <div class="flex items-center gap-2.5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-500 text-white">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+            <path d="M3 10.5 12 3l9 7.5"></path>
+            <path d="M5 9.5V21h14V9.5"></path>
+            <path d="M10 21v-6h4v6"></path>
+          </svg>
+        </span>
+        <span class="text-[15px] font-extrabold tracking-tight text-white">Real Estate Broker</span>
+      </div>
+      <p class="mt-4 max-w-xs text-sm leading-relaxed text-brand-200">
+        Motor de búsqueda inmobiliaria con API pública. La base del ERP white-label multi-tenant
+        para inmobiliarias que quieren vender más y mejor.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-white">Explorar</h2>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        {product.map((item) => (
+          <li><a href={item.href} class="text-brand-200 transition hover:text-white">{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-white">Negocio</h2>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        {business.map((item) => (
+          <li><a href={item.href} class="text-brand-200 transition hover:text-white">{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-white">Contacto</h2>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        {contact.map((item) => (
+          <li>
+            <a href={item.href} class="break-all text-brand-200 transition hover:text-white">
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-brand-900/80">
+    <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-brand-300 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+      <p>© {year} Real Estate Broker. Todos los derechos reservados.</p>
+      <p>Hecho con Astro y Cloudflare · <a href="/api/health" class="underline-offset-2 hover:text-white hover:underline">Estado del servicio</a></p>
+    </div>
+  </div>
+</footer>

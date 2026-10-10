@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Torre de oficinas vidriada">
+  <defs>
+    <linearGradient id="skyO" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e3a5f"/>
+      <stop offset="1" stop-color="#7dd3fc"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="0.5" stop-color="#1d4c8b"/>
+      <stop offset="1" stop-color="#0e2340"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#skyO)"/>
+  <circle cx="120" cy="120" r="40" fill="#fde68a" opacity="0.85"/>
+  <rect y="520" width="800" height="80" fill="#1e293b"/>
+  <rect x="240" y="60" width="320" height="470" rx="10" fill="url(#glass)"/>
+  <g stroke="#7dd3fc" stroke-width="3" opacity="0.5">
+    <line x1="240" y1="140" x2="560" y2="140"/><line x1="240" y1="220" x2="560" y2="220"/>
+    <line x1="240" y1="300" x2="560" y2="300"/><line x1="240" y1="380" x2="560" y2="380"/>
+    <line x1="240" y1="460" x2="560" y2="460"/>
+    <line x1="320" y1="60" x2="320" y2="530"/><line x1="400" y1="60" x2="400" y2="530"/><line x1="480" y1="60" x2="480" y2="530"/>
+  </g>
+  <rect x="560" y="220" width="130" height="310" rx="8" fill="#16365f"/>
+  <g stroke="#3379d1" stroke-width="3" opacity="0.55">
+    <line x1="560" y1="290" x2="690" y2="290"/><line x1="560" y1="360" x2="690" y2="360"/>
+    <line x1="560" y1="430" x2="690" y2="430"/><line x1="625" y1="220" x2="625" y2="530"/>
+  </g>
+  <rect x="150" y="330" width="90" height="200" rx="6" fill="#0e2340"/>
+  <rect x="166" y="360" width="26" height="26" fill="#fbbf24" opacity="0.9"/>
+  <rect x="200" y="360" width="26" height="26" fill="#7dd3fc" opacity="0.6"/>
+  <rect x="166" y="410" width="26" height="26" fill="#7dd3fc" opacity="0.5"/>
+  <rect x="200" y="410" width="26" height="26" fill="#fbbf24" opacity="0.7"/>
+  <rect x="340" y="480" width="120" height="50" fill="#f8fafc"/>
+  <rect x="352" y="492" width="30" height="26" fill="#7dd3fc"/>
+  <rect x="392" y="492" width="30" height="26" fill="#7dd3fc"/>
+  <rect x="432" y="492" width="14" height="26" fill="#7dd3fc"/>
+</svg>
