@@ -11,6 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/selvaggiesteban/Real_Estate_Broker/actions/workflows/ci.yml"><img src="https://github.com/selvaggiesteban/Real_Estate_Broker/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/selvaggiesteban/Real_Estate_Broker/actions/workflows/sync-tokko.yml"><img src="https://github.com/selvaggiesteban/Real_Estate_Broker/actions/workflows/sync-tokko.yml/badge.svg" alt="Sync Tokko" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-blue?style=flat-square" alt="Licencia MIT" /></a>
   <img src="https://img.shields.io/badge/Astro-v5-orange?style=flat-square" alt="Astro 5" />
   <img src="https://img.shields.io/badge/Cloudflare-Pages-purple?style=flat-square" alt="Cloudflare Pages" />
@@ -65,7 +66,7 @@ Este buscador es el **MVP** de una ambición mayor: un **ERP de marca blanca (wh
 
 - **Runtime**: Workers via `@astrojs/cloudflare` (SSR en el edge, sin servidor propio).
 - **Config**: `wrangler.jsonc` declara `"pages_build_output_dir": "dist/"`, que es lo que Cloudflare Pages interpreta como **integración Git directa**: el build del proyecto usa esa carpeta como output.
-- **Datos**: dataset versionado (`src/data/properties.json`) con un motor de búsqueda puro en TypeScript (`src/lib/search.ts`) — sin dependencias, testeable y reemplazable por D1/KV sin tocar la UI.
+- **Datos**: dataset versionado (`src/data/properties.json`) con un motor de búsqueda puro en TypeScript (`src/lib/search.ts`) — sin dependencias, testeable y reemplazable por D1/KV sin tocar la UI. El dataset puede alimentarse por sincronización automática con Tokko (ver [Sincronización](#-sincronización-de-stock-tokko-broker)).
 
 ## 🚀 Deploy en Cloudflare Pages
 
@@ -101,6 +102,45 @@ El workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-page
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) corre en cada push/PR: `npm ci` → `astro check` (tipos) → `astro build` → artefacto `dist/`.
 
+## 🔁 Sincronización de stock (Tokko Broker)
+
+El inventario puede alimentarse automáticamente desde la **API de [Tokko Broker](https://developers.tokkobroker.com)**. El flujo es **build-time** (sin base de datos en runtime):
+
+```
+cron (cada 6 hs) o ejecución manual
+  → node scripts/sync/main.mjs   # pull paginado de /api/v1/property/ + mapper
+  → escribe src/data/properties.json
+  → commit automático a main
+  → CI (check + build) → deploy en Cloudflare Pages
+```
+
+### Cómo activarlo
+
+1. Conseguí la API key en el [Tokko Developers Hub](https://developers.tokkobroker.com) (guía *Primer paso*).
+2. En GitHub: **Settings → Secrets and variables → Actions → Secrets → New repository secret** con nombre `TOKKO_API_KEY`.
+3. Ejecutá **Actions → Sync Tokko → Run workflow**, o esperá al cron (`17 */6 * * *` UTC, cada 6 hs).
+
+Sin el secret, el workflow termina en verde con *"sync omitido"* y se conserva el dataset seed de 24 propiedades. Los schedules de Actions sólo corren si el repo tuvo actividad reciente; el disparo manual siempre está disponible.
+
+### Comandos locales
+
+```bash
+npm run sync                             # sin TOKKO_API_KEY → skip (no toca nada)
+npm run sync -- --self-test              # valida el mapper contra fixtures (sin red)
+npm run sync -- --fixtures --dry-run     # pipeline completo usando fixtures
+npm run sync -- --dry-run                # con key: trae y reporta, sin escribir
+TOKKO_API_KEY=xxx npm run sync -- --capture   # 1ª vez con key: congela payloads reales
+```
+
+- **Guard anti-vacío**: si la API devuelve 0 propiedades mapeables o falla, el script sale con error **sin escribir** nada.
+- El mapper es defensivo y reporta incidencias (`moneda-inferida`, `sin-coordenadas`, `tipo-fallback`, …); los registros **sin precio o sin operación** se descartan y se cuentan en el resumen del job.
+- `--capture` reemplaza el fixture artesanal por payloads reales de Tokko (el self-test pasa a modo genérico).
+- Overrides de agencia por env: `AGENCY_NAME`, `AGENCY_PHONE`, `AGENCY_EMAIL`.
+
+### Zonaprop
+
+La ruta recomendada para publicar en **Zonaprop** es la **integración nativa Tokko ↔ Zonaprop** ([App Exchange](https://www.tokkobroker.com/es-ar/app-exchange), de pago): el portal propio y Zonaprop se alimentan de la misma fuente, sin código extra de nuestra parte. Un feed XML propio (`/feeds/zonaprop.xml`) queda como alternativa para escenarios sin Tokko (API sincrónica de Zonaprop requiere alta comercial).
+
 ## 💻 Desarrollo local
 
 ```bash
@@ -118,7 +158,7 @@ npm run build      # genera dist/
 npx wrangler pages dev dist
 ```
 
-Variables de entorno: ninguna requerida para el MVP. `.dev.vars` queda reservado para secretos futuros (API keys, webhooks).
+Variables de entorno: ninguna requerida en runtime para el MVP. El sync de Tokko usa `TOKKO_API_KEY` como **secret de GitHub Actions** (no corre en el edge); `.dev.vars` queda reservado para secretos futuros (API keys, webhooks).
 
 ## 📡 API pública
 
@@ -154,7 +194,10 @@ Errores: envelope `{ "ok": false, "error": { "code", "message" } }` con códigos
 Real_Estate_Broker/
 ├── .github/workflows/
 │   ├── ci.yml                  # Typecheck + build en cada push/PR
+│   ├── sync-tokko.yml          # Sync build-time de stock (cron cada 6 h + manual)
 │   └── deploy-pages.yml        # Deploy alternativo vía wrangler-action
+├── scripts/
+│   └── sync/                   # Cliente Tokko + mapper + fixtures (Node, sin deps)
 ├── public/
 │   ├── images/properties/      # Ilustraciones SVG de las publicaciones
 │   ├── favicon.svg
@@ -189,13 +232,14 @@ El MVP es el buscador. El producto final (**E2E**) es un **ERP inmobiliario de m
 | Fase | Módulo | Descripción |
 |------|--------|-------------|
 | ✅ MVP | **Portal de publicaciones** | Buscador SSR + API pública (este repo) |
+| ✅ MVP | **Sincronización Tokko** | Pull build-time desde la API de Tokko (`scripts/sync`) + cron de Actions cada 6 h |
 | Fase 2 | **CRM de leads** | Consultas del portal/WhatsApp con asignación y seguimiento; `POST /api/leads` ya expuesto |
 | Fase 2 | **Backoffice de inventario** | Altas/bajas de publicaciones, destacadas, media |
 | Fase 3 | **Multi-tenancy** | Tenant por host/subdominio, branding por tokens (logo, colores, tipografía), aislamiento de datos |
 | Fase 3 | **D1 + Auth** | Postgres-compatible en Cloudflare D1, roles (admin, agente, propietario) |
 | Fase 4 | **Contratos y reservas** | Señas, boletas, contratos de locación/venta |
 | Fase 4 | **Facturación y licencias** | Planes Starter / Pro / Enterprise, límites facturables, cobros recurrentes (ej. Mercado Pago / Stripe) |
-| Fase 5 | **Sincronización de portales** | Zonaprop, Argenprop, Mercado Libre Inmuebles + webhooks |
+| Fase 5 | **Sincronización de portales** | Zonaprop, Argenprop, Mercado Libre Inmuebles + webhooks (con Tokko ya sincronizado en el MVP; Zonaprop vía su integración nativa con Tokko o alta comercial de feed/API) |
 | Fase 5 | **Portal de clientes** | Área privada de propietarios e inquilinos |
 
 **Principios de arquitectura multi-tenant:**

@@ -1,0 +1,63 @@
+{
+  "note": "Shape esperado de GET /api/v1/property/ (Tokko). Registros artificiales para self-test sin red. Ejecutá `TOKKO_API_KEY=... node scripts/sync/main.mjs --capture` con una API key real para reemplazarlo por payloads de producción (pasa a modo self-test genérico, sin bloque expected).",
+  "items": [
+    {
+      "id": 9001,
+      "title": "Departamento en Palermo Soho con balcón",
+      "description": "<p>Departamento de 3 ambientes con balcón orientado al norte.</p><p>A pasos de Plaza Serrano.</p>",
+      "operation": { "id": 1, "name": "Venta" },
+      "property_type": { "id": 2, "name": "Departamento" },
+      "price": 189000,
+      "expenses": 95000,
+      "currency": { "id": 1, "name": "USD" },
+      "address": "Gorriti 5480",
+      "location": { "id": 34, "name": "Palermo", "path": "Argentina > Buenos Aires > CABA > Palermo" },
+      "locality": "CABA",
+      "state": { "id": 7, "name": "Buenos Aires" },
+      "latitude": -34.5885,
+      "longitude": -58.4269,
+      "rooms": 3,
+      "bedrooms": 2,
+      "bathrooms": 1,
+      "surface": 78,
+      "covered_surface": 72,
+      "floor": "8°",
+      "orientation": "Norte",
+      "age": "1-5 años",
+      "features": ["Balcón", "Aire acondicionado", "Ascensor"],
+      "images": [
+        { "url": "https://cdn.example.com/tokko/9001-1.jpg" },
+        { "url": "https://cdn.example.com/tokko/9001-2.jpg", "thumbnail": "https://cdn.example.com/tokko/9001-2-thumb.jpg" }
+      ],
+      "created_at": "2026-09-10T14:30:00Z",
+      "featured": true
+    },
+    {
+      "id": 9002,
+      "title": "PH en Villa Urquiza",
+      "description": "PH de 4 ambientes con patio transitable.",
+      "operation": { "id": 2, "name": "Alquiler" },
+      "property_type": { "id": 5, "name": "PH" },
+      "price": 480000,
+      "address": "Av. Nazca 1234",
+      "location": { "id": 40, "name": "Villa Urquiza", "path": "Argentina > Buenos Aires > CABA > Villa Urquiza" },
+      "locality": "CABA",
+      "rooms": 4,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "surface": 120,
+      "age": 0,
+      "created_at": "2026-09-15"
+    }
+  ],
+  "expected": {
+    "ids": ["tokko-9001", "tokko-9002"],
+    "operaciones": ["venta", "alquiler"],
+    "tipos": ["departamento", "ph"],
+    "monedas": ["USD", "ARS"],
+    "firstSlugEndsWith": "-9001",
+    "firstFecha": "2026-09-10",
+    "secondAntiguedad": "A estrenar",
+    "mustIncludeIssues": ["moneda-inferida", "sin-imagenes", "sin-coordenadas"]
+  }
+}

@@ -11,6 +11,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "sync": "node scripts/sync/main.mjs",
     "astro": "astro",
     "pages:deploy": "wrangler pages deploy dist --project-name=real-estate-broker"
   },
