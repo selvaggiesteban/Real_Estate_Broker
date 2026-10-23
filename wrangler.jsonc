@@ -6,5 +6,12 @@
   "pages_build_output_dir": "dist/",
   "observability": {
     "enabled": true
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "real-estate-broker",
+      "database_id": "b7ae490d-51f8-4e01-b690-a79d9d7af09e"
+    }
+  ]
 }

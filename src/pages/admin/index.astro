@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { adminUnconfiguredResponse, adminUnauthorizedResponse, checkAdmin } from '../../lib/admin';
+import type { Lead } from '../../lib/types';
+
+const password = Astro.locals.runtime.env.ADMIN_PASSWORD;
+const auth = checkAdmin(Astro.request, password);
+if (auth === 'unconfigured') return adminUnconfiguredResponse();
+if (auth === 'unauthorized') return adminUnauthorizedResponse();
+
+const db = Astro.locals.runtime.env.DB;
+const limit = 200;
+let total = 0;
+let leads: Lead[] = [];
+
+try {
+  const countResult = await db.prepare('SELECT COUNT(*) AS total FROM leads').all<{ total: number }>();
+  total = countResult.results[0]?.total ?? 0;
+  const { results } = await db
+    .prepare(
+      'SELECT id, nombre, email, telefono, propiedad, mensaje, source, created_at FROM leads ORDER BY created_at DESC, id DESC LIMIT ?',
+    )
+    .bind(limit)
+    .all<Lead>();
+  leads = results;
+} catch (error) {
+  console.error('[admin:leads]', error);
+  return new Response('No se pudo consultar la base de leads.', { status: 500 });
+}
+
+const formatDate = (iso: string) => iso.replace('T', ' ').slice(0, 16);
+---
+
+<BaseLayout title="Admin · Leads — Real Estate Broker" description="Panel interno de consultas (leads) de Real Estate Broker.">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="text-xs font-extrabold uppercase tracking-widest text-accent-500">Admin</p>
+        <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Consultas (leads)</h1>
+        <p class="mt-1.5 text-sm text-slate-500">
+          {total} {total === 1 ? 'consulta registrada' : 'consultas registradas'} · mostrando {leads.length}
+        </p>
+      </div>
+      <div class="flex gap-3">
+        <a href="/api/leads?format=csv" class="btn-secondary">Exportar CSV</a>
+        <a href="/" class="btn-secondary">Volver al sitio</a>
+      </div>
+    </div>
+
+    <div class="card mt-6 overflow-hidden">
+      {
+        leads.length === 0 ? (
+          <p class="p-10 text-center text-sm text-slate-500">
+            Todavía no hay consultas. Aparecen acá cuando alguien envía el formulario de una propiedad.
+          </p>
+        ) : (
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="border-b border-slate-200 bg-slate-50/70 text-xs font-bold uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th class="px-4 py-3">Fecha</th>
+                  <th class="px-4 py-3">Nombre</th>
+                  <th class="px-4 py-3">Email</th>
+                  <th class="px-4 py-3">Teléfono</th>
+                  <th class="px-4 py-3">Propiedad</th>
+                  <th class="px-4 py-3">Mensaje</th>
+                  <th class="px-4 py-3">Origen</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {leads.map((lead) => (
+                  <tr class="align-top hover:bg-slate-50">
+                    <td class="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(lead.created_at)}</td>
+                    <td class="whitespace-nowrap px-4 py-3 font-semibold text-slate-900">{lead.nombre}</td>
+                    <td class="px-4 py-3">
+                      <a href={`mailto:${lead.email}`} class="break-all text-accent-600 hover:underline">
+                        {lead.email}
+                      </a>
+                    </td>
+                    <td class="whitespace-nowrap px-4 py-3 text-slate-600">{lead.telefono || '—'}</td>
+                    <td class="max-w-[14rem] px-4 py-3 text-slate-700">{lead.propiedad || '—'}</td>
+                    <td class="max-w-[22rem] px-4 py-3 text-slate-600" title={lead.mensaje}>
+                      <span class="line-clamp-3">{lead.mensaje}</span>
+                    </td>
+                    <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-400">{lead.source || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
+    </div>
+
+    <p class="mt-4 text-xs text-slate-400">
+      Basic Auth con usuario <code class="font-mono">admin</code>. API en JSON: <code class="font-mono">GET /api/leads</code>
+      (paginada con <code class="font-mono">?page=</code> y <code class="font-mono">?limit=</code>).
+    </p>
+  </div>
+</BaseLayout>

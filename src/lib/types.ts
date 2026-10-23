@@ -58,6 +58,17 @@ export interface Property {
   inmobiliaria: Agency;
 }
 
+export interface Lead {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string;
+  propiedad: string;
+  mensaje: string;
+  source: string;
+  created_at: string;
+}
+
 export interface SearchFilters {
   operacion?: Operacion;
   tipos: TipoPropiedad[];

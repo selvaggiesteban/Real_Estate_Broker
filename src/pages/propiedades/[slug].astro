@@ -227,6 +227,35 @@ const detalles = [
               {property.inmobiliaria.telefono}
             </a>
 
+            <form id="lead-form" class="mt-4 space-y-3 border-t border-slate-100 pt-4" data-propiedad={property.titulo}>
+              <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500">Pedir información</h3>
+              <div>
+                <label for="lead-nombre" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre *</label>
+                <input id="lead-nombre" name="nombre" type="text" required minlength="2" autocomplete="name" class="input-base w-full" />
+              </div>
+              <div>
+                <label for="lead-email" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Email *</label>
+                <input id="lead-email" name="email" type="email" required autocomplete="email" class="input-base w-full" />
+              </div>
+              <div>
+                <label for="lead-telefono" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Teléfono</label>
+                <input id="lead-telefono" name="telefono" type="tel" autocomplete="tel" class="input-base w-full" />
+              </div>
+              <div>
+                <label for="lead-mensaje" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Mensaje *</label>
+                <textarea
+                  id="lead-mensaje"
+                  name="mensaje"
+                  required
+                  minlength="10"
+                  rows="3"
+                  class="input-base w-full resize-y"
+                  placeholder="Hola, me interesa esta propiedad. ¿Sigue disponible?"></textarea>
+              </div>
+              <button type="submit" class="btn-primary w-full disabled:opacity-50">Enviar consulta</button>
+              <p id="lead-status" class="hidden text-sm" role="status" aria-live="polite"></p>
+            </form>
+
             <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Publicada por</p>
               <p class="mt-1 text-sm font-bold text-slate-900">{property.inmobiliaria.nombre}</p>
@@ -257,4 +286,52 @@ const detalles = [
       )
     }
   </div>
+
+  <script>
+    const form = document.getElementById('lead-form');
+    const status = document.getElementById('lead-status');
+    const submit = form?.querySelector('button[type="submit"]');
+
+    function showStatus(message: string, ok: boolean) {
+      if (!status) return;
+      status.textContent = message;
+      status.classList.remove('hidden', 'text-red-700', 'text-slate-900');
+      status.classList.add(ok ? 'text-slate-900' : 'text-red-700', 'font-semibold');
+    }
+
+    if (form instanceof HTMLFormElement && status) {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        if (submit instanceof HTMLButtonElement) submit.disabled = true;
+        status.classList.add('hidden');
+
+        fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            nombre: String(data.get('nombre') ?? ''),
+            email: String(data.get('email') ?? ''),
+            telefono: String(data.get('telefono') ?? ''),
+            mensaje: String(data.get('mensaje') ?? ''),
+            propiedad: form.dataset.propiedad ?? '',
+            source: 'ficha-propiedad',
+          }),
+        })
+          .then(async (response) => ({ ok: response.ok, body: await response.json().catch(() => null) }))
+          .then(({ ok, body }) => {
+            if (ok && body?.ok) {
+              form.reset();
+              showStatus(body.data?.mensaje ?? 'Recibimos tu consulta.', true);
+            } else {
+              showStatus(body?.error?.message ?? 'No pudimos enviar tu consulta. Intentá nuevamente.', false);
+            }
+          })
+          .catch(() => showStatus('Error de conexión. Intentá nuevamente.', false))
+          .finally(() => {
+            if (submit instanceof HTMLButtonElement) submit.disabled = false;
+          });
+      });
+    }
+  </script>
 </BaseLayout>

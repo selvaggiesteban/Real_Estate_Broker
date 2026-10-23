@@ -158,7 +158,7 @@ npm run build      # genera dist/
 npx wrangler pages dev dist
 ```
 
-Variables de entorno: ninguna requerida en runtime para el MVP. El sync de Tokko usa `TOKKO_API_KEY` como **secret de GitHub Actions** (no corre en el edge); `.dev.vars` queda reservado para secretos futuros (API keys, webhooks).
+Variables de entorno de runtime: `ADMIN_PASSWORD` (secreto) para el panel `/admin` y `GET /api/leads`. En local va en `.dev.vars` (gitignored); en producción se carga con `npx wrangler pages secret put ADMIN_PASSWORD --project-name=real-estate-broker`. El sync de Tokko usa `TOKKO_API_KEY` como **secret de GitHub Actions** (no corre en el edge).
 
 ## 📡 API pública
 
@@ -169,7 +169,8 @@ Variables de entorno: ninguna requerida en runtime para el MVP. El sync de Tokko
 | `GET` | `/api/health` | Healthcheck del servicio |
 | `GET` | `/api/properties` | Listado con filtros, orden y paginación |
 | `GET` | `/api/properties/{id}` | Detalle por `id` (ej. `p001`) o `slug` |
-| `POST` | `/api/leads` | Recepción de consultas de contacto |
+| `POST` | `/api/leads` | Recepción de consultas de contacto (persiste en D1) |
+| `GET` | `/api/leads` | Listado paginado de leads (Basic Auth `admin`) · `?format=csv` exporta |
 
 **Parámetros de `/api/properties`**: `operacion`, `tipo`, `zona` (repetibles o coma-separados), `ambientes`, `precio_min`, `precio_max`, `superficie_min`, `orden` (`recientes` \| `precio-asc` \| `precio-desc` \| `superficie-desc`), `page`, `limit` (máx. 48).
 
@@ -187,6 +188,14 @@ curl "https://real-estate-broker.pages.dev/api/properties?operacion=venta&tipo=d
 ```
 
 Errores: envelope `{ "ok": false, "error": { "code", "message" } }` con códigos `NOT_FOUND` (404), `VALIDATION_ERROR` / `INVALID_JSON` (400).
+
+## 🔐 Panel admin
+
+`/admin` muestra las consultas (leads) recibidas, protegido con **Basic Auth**: usuario `admin` y la contraseña del secreto `ADMIN_PASSWORD`. El formulario "Pedir información" de cada ficha de propiedad hace `POST /api/leads`, que persiste en **D1** (tabla `leads`, schema en `migrations/0001_leads.sql`, binding `DB` en `wrangler.jsonc`).
+
+- Listado JSON: `GET /api/leads?page=1&limit=100` (máx. 500 por página)
+- Export CSV: `GET /api/leads?format=csv`
+- Sin `ADMIN_PASSWORD` configurado la API responde `503 ADMIN_UNCONFIGURED`; sin credenciales, `401`.
 
 ## 📁 Estructura del proyecto
 
@@ -233,7 +242,7 @@ El MVP es el buscador. El producto final (**E2E**) es un **ERP inmobiliario de m
 |------|--------|-------------|
 | ✅ MVP | **Portal de publicaciones** | Buscador SSR + API pública (este repo) |
 | ✅ MVP | **Sincronización Tokko** | Pull build-time desde la API de Tokko (`scripts/sync`) + cron de Actions cada 6 h |
-| Fase 2 | **CRM de leads** | Consultas del portal/WhatsApp con asignación y seguimiento; `POST /api/leads` ya expuesto |
+| Fase 2 | **CRM de leads** | Consultas persistidas en D1 con panel `/admin` y export CSV (MVP); faltan asignación y seguimiento |
 | Fase 2 | **Backoffice de inventario** | Altas/bajas de publicaciones, destacadas, media |
 | Fase 3 | **Multi-tenancy** | Tenant por host/subdominio, branding por tokens (logo, colores, tipografía), aislamiento de datos |
 | Fase 3 | **D1 + Auth** | Postgres-compatible en Cloudflare D1, roles (admin, agente, propietario) |
