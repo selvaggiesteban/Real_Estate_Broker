@@ -83,7 +83,7 @@ const faqs = [
   <section class="relative overflow-hidden bg-brand-950">
     <div
       class="absolute inset-0 opacity-40"
-      style="background-image: radial-gradient(circle at 80% 20%, rgba(255,107,53,0.3), transparent 40%), radial-gradient(circle at 10% 80%, rgba(51,121,209,0.35), transparent 40%);"
+      style="background-image: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.14), transparent 40%), radial-gradient(circle at 10% 80%, rgba(255,255,255,0.16), transparent 40%);"
       aria-hidden="true"
     ></div>
     <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
@@ -96,7 +96,7 @@ const faqs = [
         facturación. Vos vendés la suscripción con tu marca; nosotros mantenemos la tecnología.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="#planes" class="btn-primary">Ver planes y licencias</a>
+        <a href="#planes" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-brand-950 shadow-sm transition hover:bg-slate-200 active:scale-[0.98]">Ver planes y licencias</a>
         <a href="mailto:hola@realestatebroker.example.com?subject=Demo%20ERP%20white-label" class="inline-flex items-center justify-center rounded-lg border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Solicitar una demo</a>
       </div>
     </div>
@@ -163,10 +163,10 @@ const faqs = [
         <ul class="divide-y divide-slate-100">
           {
             [
-              { marca: 'Nueva Espacio', host: 'nuevaespacio.com', color: '#ff6b35', plan: 'Pro' },
-              { marca: 'Metroq', host: 'metroq.com.ar', color: '#245fad', plan: 'Pro' },
-              { marca: 'Delta Living', host: 'portal.deltaliving.com', color: '#0f766e', plan: 'Starter' },
-              { marca: 'Broker Capital', host: 'brokercapital.com', color: '#7c3aed', plan: 'Enterprise' },
+              { marca: 'Nueva Espacio', host: 'nuevaespacio.com', color: '#171717', plan: 'Pro' },
+              { marca: 'Metroq', host: 'metroq.com.ar', color: '#525252', plan: 'Pro' },
+              { marca: 'Delta Living', host: 'portal.deltaliving.com', color: '#737373', plan: 'Starter' },
+              { marca: 'Broker Capital', host: 'brokercapital.com', color: '#a3a3a3', plan: 'Enterprise' },
             ].map((tenant) => (
               <li class="flex items-center gap-3 px-5 py-4">
                 <span class="h-9 w-9 shrink-0 rounded-xl" style={`background-color: ${tenant.color}`} aria-hidden="true" />
@@ -268,7 +268,7 @@ const faqs = [
       </p>
       <a
         href="mailto:hola@realestatebroker.example.com?subject=Quiero%20mi%20portal%20white-label"
-        class="inline-flex items-center justify-center rounded-lg bg-brand-950 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-900"
+        class="inline-flex items-center justify-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg transition hover:bg-slate-200"
       >
         Solicitar demo white-label
       </a>
