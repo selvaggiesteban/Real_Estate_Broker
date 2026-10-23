@@ -116,8 +116,20 @@ const jsonLd = {
   </section>
 
   <!-- Operaciones rápidas -->
-  <section class="mx-auto -mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
+  <section class="relative z-10 mx-auto -mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-4 sm:grid-cols-3 lg:max-w-4xl">
+      <a
+        href="/propiedades"
+        class="card flex items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:border-accent-300 hover:shadow-md"
+      >
+        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        </span>
+        <span>
+          <span class="block text-lg font-bold text-slate-900">Buscar</span>
+          <span class="block text-sm text-slate-500">{stats.totalPropiedades} propiedades publicadas</span>
+        </span>
+      </a>
       <a
         href="/propiedades?operacion=venta"
         class="card flex items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:border-accent-300 hover:shadow-md"
